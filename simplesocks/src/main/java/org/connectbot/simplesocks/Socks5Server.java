@@ -21,23 +21,50 @@ import java.net.InetAddress;
 import java.nio.charset.Charset;
 
 /**
- * Created by kroot on 9/15/15.
+ * A simple SOCKS5 server which does no authentication and only accepts {@code CONNECT} requests (i.e., no
+ * {@code BIND}).
+ * <p>
+ * Example usage:
+ * <pre><code>
+ *     Socks5Server server = new Socks5Server(sockIn, sockOut);
+ *     if (server.acceptAuthentication() &amp;&amp; server.readRequest()) {
+ *         server.sendReply(ResponseCode.SUCCESS);
+ *     } else {
+ *         {@literal /}* handle failure *{@literal /}
+ *     }
+ * </code></pre>
  */
 public class Socks5Server {
-    /** Address type that indicates the request is IPv4. */
+    /**
+     * Address type that indicates the request is IPv4.
+     */
     private static final int ATYPE_IPV4 = 0x01;
 
-    /** Address type that indicates the request is IPv6. */
+    /**
+     * Address type that indicates the request is IPv6.
+     */
     private static final int ATYPE_DNS = 0x03;
 
-    /** Address type that indicates the request is IPv6. */
+    /**
+     * Address type that indicates the request is IPv6.
+     */
     private static final int ATYPE_IPV6 = 0x04;
 
     private final DataInputStream in;
     private final DataOutputStream out;
 
+    /**
+     * Command that a client can request. Currently only the {@link #CONNECT} command is supported in ConnectBot, so
+     * {@link #BIND} may fail.
+     */
     public enum Command {
+        /**
+         * Represents a request from the client for the server to connect the input and output streams to a remote host.
+         */
         CONNECT(0x01),
+        /**
+         * Represents a request from the client for the server to start listening on a port.
+         */
         BIND(0x02);
 
         public static Command fromCommandNumber(int commandNumber) {
@@ -62,14 +89,41 @@ public class Socks5Server {
     }
 
     public enum ResponseCode {
+        /**
+         * Sent when the server accepted the command and is going to connect the client.
+         */
         SUCCESS((byte) 0x00),
+        /**
+         * An unspecified failure caused the server not to be able to comply.
+         */
         GENERAL_FAILURE((byte) 0x01),
+        /**
+         * The server denied the connection due to a ruleset that prevented it.
+         */
         RULESET_DENIED((byte) 0x02),
+        /**
+         * The requested network was unreachable.
+         */
         NETWORK_UNREACHABLE((byte) 0x03),
+        /**
+         * The requested host was unreachable.
+         */
         HOST_UNREACHABLE((byte) 0x04),
+        /**
+         * The host refused a connection on the requested port.
+         */
         CONNECTION_REFUSED((byte) 0x05),
+        /**
+         * The Time-To-Live expired when trying to reach the server.
+         */
         TTL_EXPIRED((byte) 0x06),
+        /**
+         * The command sent was not supported.
+         */
         COMMAND_NOT_SUPPORTED((byte) 0x07),
+        /**
+         * The address type requested was not supported.
+         */
         ADDRESS_TYPE_NOT_SUPPORTED((byte) 0x08);
 
         private final byte code;
@@ -83,13 +137,19 @@ public class Socks5Server {
         }
     }
 
-    /** The command the request is referring to. */
+    /**
+     * The command the request is referring to.
+     */
     private Command command;
 
-    /** Address requested when the {@link Command} was given. */
+    /**
+     * Address requested when the {@link Command} was given.
+     */
     private InetAddress address;
 
-    /** The port requested when the {@link Command} was given. */
+    /**
+     * The port requested when the {@link Command} was given.
+     */
     private int port = -1;
 
     public Socks5Server(InputStream in, OutputStream out) {
@@ -97,6 +157,13 @@ public class Socks5Server {
         this.out = new DataOutputStream(out);
     }
 
+    /**
+     * Begin the authentication with the client. If the authentication succeeds, this will return {@code true}.
+     * Otherwise, the server must hang up on the client.
+     *
+     * @throws IOException when the underlying stream has a problem
+     * @return {@code true} when authentication succeeds
+     */
     public boolean acceptAuthentication() throws IOException {
         checkProtocolVersion();
 
@@ -129,6 +196,15 @@ public class Socks5Server {
         }
     }
 
+    /**
+     * Reads the type of request the client has made.
+     *
+     * @throws IOException when the underlying stream has a problem
+     * @see #getCommand()
+     * @see #getAddress()
+     * @see #getPort()
+     * @return {@code true} if the client request was valid
+     */
     public boolean readRequest() throws IOException {
         checkProtocolVersion();
 
@@ -166,6 +242,14 @@ public class Socks5Server {
         return correct;
     }
 
+    /**
+     * Send back to the client the given {@code response}. If the {@link ResponseCode#SUCCESS SUCCESS} code is returned,
+     * the server must immediately connect the input and output streams to the requested socket. If any other code is
+     * returned, then the server must hang up on the client.
+     *
+     * @param response code to send back to the client
+     * @throws IOException when the underlying stream has a problem
+     */
     public void sendReply(ResponseCode response) throws IOException {
         byte[] responseBytes = new byte[]{
                 (byte) 0x05, /* version */
