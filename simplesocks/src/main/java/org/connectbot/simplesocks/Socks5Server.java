@@ -27,7 +27,7 @@ import java.nio.charset.Charset;
  * Example usage:
  * <pre><code>
  *     Socks5Server server = new Socks5Server(sockIn, sockOut);
- *     if (server.acceptAuthentication() && server.readRequest()) {
+ *     if (server.acceptAuthentication() &amp;&amp; server.readRequest()) {
  *         server.sendReply(ResponseCode.SUCCESS);
  *     } else {
  *         {@literal /}* handle failure *{@literal /}
@@ -162,6 +162,7 @@ public class Socks5Server {
      * Otherwise, the server must hang up on the client.
      *
      * @throws IOException when the underlying stream has a problem
+     * @return {@code true} when authentication succeeds
      */
     public boolean acceptAuthentication() throws IOException {
         checkProtocolVersion();
@@ -196,12 +197,13 @@ public class Socks5Server {
     }
 
     /**
-     * Reads the type of request the client has made. Returns {@code true} if the client made a valid request.
+     * Reads the type of request the client has made.
      *
      * @throws IOException when the underlying stream has a problem
      * @see #getCommand()
      * @see #getAddress()
      * @see #getPort()
+     * @return {@code true} if the client request was valid
      */
     public boolean readRequest() throws IOException {
         checkProtocolVersion();
@@ -245,6 +247,7 @@ public class Socks5Server {
      * the server must immediately connect the input and output streams to the requested socket. If any other code is
      * returned, then the server must hang up on the client.
      *
+     * @param response code to send back to the client
      * @throws IOException when the underlying stream has a problem
      */
     public void sendReply(ResponseCode response) throws IOException {
