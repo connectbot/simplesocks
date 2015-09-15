@@ -14,10 +14,11 @@ matrix:
     - jdk: oraclejdk7
     - jdk: openjdk7
       env: COVERAGE="true"
+      env: RELEASE="true"
 
 after_success:
-- "if [ -n $COVERAGE ]; then ./gradlew jacocoTestReport coveralls; fi"
-- "./gradlew bintrayUpload"
+- if [ "$COVERAGE" = "true" ]; then ./gradlew jacocoTestReport coveralls; fi
+- if [ "$RELEASE" = "true" ]; then ./gradlew bintrayUpload; fi
 
 env:
   global:
