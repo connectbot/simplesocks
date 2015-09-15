@@ -74,7 +74,6 @@ public class Socks5ServerTest {
         Socks5Server server = getAuthenticatedSocks5Server((byte) 0x05, (byte) 0x01, (byte) 0x00,
                 (byte) 0x01, (byte) 0x01, (byte) 0x00, (byte) 0x01, (byte) 0xC0, (byte) 0xA8, (byte) 0x01, (byte) 0x01);
         assertTrue(server.readRequest());
-        assertArrayEquals(new byte[]{(byte) 0xC0, (byte) 0xA8, (byte) 0x01, (byte) 0x01}, server.getAddress().getAddress());
     }
 
     @Test(expected = IOException.class)
@@ -82,7 +81,6 @@ public class Socks5ServerTest {
         Socks5Server server = getAuthenticatedSocks5Server((byte) 0x05, (byte) 0x01, (byte) 0x00,
                 (byte) 0x01, (byte) 0x01, (byte) 0x10, (byte) 0x01, (byte) 0xC0, (byte) 0xA8, (byte) 0x01, (byte) 0x01);
         assertTrue(server.readRequest());
-        assertArrayEquals(new byte[]{(byte) 0xC0, (byte) 0xA8, (byte) 0x01, (byte) 0x01}, server.getAddress().getAddress());
     }
 
     @Test
@@ -101,6 +99,7 @@ public class Socks5ServerTest {
         assertTrue(server.readRequest());
         assertEquals(Socks5Server.Command.CONNECT, server.getCommand());
         assertArrayEquals(new byte[]{(byte) 0xC0, (byte) 0xA8, (byte) 0x01, (byte) 0x01}, server.getAddress().getAddress());
+        assertNull(server.getHostName());
         assertEquals(2001, server.getPort());
     }
 
@@ -112,7 +111,8 @@ public class Socks5ServerTest {
                 (byte) 0x22, (byte) 0xB8);
         assertTrue(server.readRequest());
         assertEquals(Socks5Server.Command.CONNECT, server.getCommand());
-        assertEquals("example.com", server.getAddress().getHostName());
+        assertEquals("example.com", server.getHostName());
+        assertNull(server.getAddress());
         assertEquals(8888, server.getPort());
     }
 
@@ -133,6 +133,7 @@ public class Socks5ServerTest {
                 (byte) 0xA5, (byte) 0x5A, (byte) 0xFF, (byte) 0x02,
                 (byte) 0xCC, (byte) 0xAA, (byte) 0x01, (byte) 0x10,
                 (byte) 0x00, (byte) 0x00, (byte) 0xD0, (byte) 0x0D}, server.getAddress().getAddress());
+        assertNull(server.getHostName());
         assertEquals(16302, server.getPort());
     }
 
@@ -145,6 +146,7 @@ public class Socks5ServerTest {
         assertTrue(server.readRequest());
         assertEquals(Socks5Server.Command.BIND, server.getCommand());
         assertArrayEquals(new byte[]{(byte) 0xC0, (byte) 0xA8, (byte) 0x01, (byte) 0x01}, server.getAddress().getAddress());
+        assertNull(server.getHostName());
         assertEquals(1080, server.getPort());
     }
 

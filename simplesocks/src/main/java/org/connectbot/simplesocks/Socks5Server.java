@@ -18,7 +18,10 @@ package org.connectbot.simplesocks;
 
 import java.io.*;
 import java.net.InetAddress;
+import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
 import java.nio.charset.Charset;
+import java.nio.charset.CharsetDecoder;
 
 /**
  * A simple SOCKS5 server which does no authentication and only accepts {@code CONNECT} requests (i.e., no
@@ -143,9 +146,14 @@ public class Socks5Server {
     private Command command;
 
     /**
-     * Address requested when the {@link Command} was given.
+     * IP address requested when the {@link Command} was given.
      */
     private InetAddress address;
+
+    /**
+     * Hostname requested when the {@link Command} was given.
+     */
+    private String hostName;
 
     /**
      * The port requested when the {@link Command} was given.
@@ -228,7 +236,12 @@ public class Socks5Server {
             int hostNameLength = in.read();
             byte[] hostName = new byte[hostNameLength];
             in.readFully(hostName);
-            address = InetAddress.getByName(new String(hostName, Charset.forName("US-ASCII")));
+
+            // We use this so we have an IOException thrown instead of an unchecked exception.
+            CharsetDecoder asciiDecoder = Charset.forName("US-ASCII").newDecoder();
+            CharBuffer hostBuffer = asciiDecoder.decode(ByteBuffer.wrap(hostName));
+
+            this.hostName = hostBuffer.toString();
         } else if (atype == ATYPE_IPV6) {
             byte[] addressBytes = new byte[16];
             in.readFully(addressBytes);
@@ -268,6 +281,10 @@ public class Socks5Server {
 
     public InetAddress getAddress() {
         return address;
+    }
+
+    public String getHostName() {
+        return hostName;
     }
 
     public int getPort() {
