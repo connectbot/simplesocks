@@ -11,9 +11,8 @@ before_cache:
 matrix:
   include:
     - jdk: oraclejdk8
-    - jdk: oraclejdk7
-      env: COVERAGE="true" RELEASE="true"
     - jdk: openjdk7
+      env: COVERAGE="true" RELEASE="true"
 
 after_success:
 - if [ "$COVERAGE" = "true" ]; then ./gradlew jacocoTestReport coveralls; fi
