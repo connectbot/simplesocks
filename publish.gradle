@@ -59,8 +59,10 @@ install {
 }
 
 //This is only needed if bintrayUpload is done as part of releasing
-task updateBintrayVersion << {
-  bintray.pkg.version.name = project.version
+task updateBintrayVersion {
+  doLast {
+    bintray.pkg.version.name = project.version
+  }
 }
 bintrayUpload.dependsOn updateBintrayVersion
 
