@@ -76,6 +76,12 @@ public class Socks5Server {
          */
         BIND(0x02);
 
+        /**
+         * Converts from the SOCKS standard numbers to our enum.:w
+         *
+         * @param commandNumber SOCKS standard numbers
+         * @return enum corresponded to the command
+         */
         public static Command fromCommandNumber(int commandNumber) {
             if (commandNumber == Command.CONNECT.commandNumber()) {
                 return Command.CONNECT;
@@ -175,8 +181,8 @@ public class Socks5Server {
      * Begin the authentication with the client. If the authentication succeeds, this will return
      * {@code true}. Otherwise, the server must hang up on the client.
      *
-     * @throws IOException when the underlying stream has a problem
      * @return {@code true} when authentication succeeds
+     * @throws IOException when the underlying stream has a problem
      */
     public boolean acceptAuthentication() throws IOException {
         checkProtocolVersion();
