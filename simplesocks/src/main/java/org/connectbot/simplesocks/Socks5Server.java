@@ -179,23 +179,24 @@ public class Socks5Server {
         byte[] methods = new byte[numMethods];
         in.readFully(methods);
 
-        boolean success = false;
-        for (byte method : methods) {
-            if (method == 0x00) {
-                success = true;
-                break;
-            }
-        }
+        boolean success = isSuccess(methods);
 
         byte[] reply = new byte[2];
         reply[0] = 0x05;
-        if (success) {
-            reply[1] = 0x00;
-        } else {
+        if (!success) {
             reply[1] = (byte) 0xFF;
         }
         out.write(reply);
         return success;
+    }
+
+    private boolean isSuccess(byte[] methods) {
+        for (byte method : methods) {
+            if (method == 0x00) {
+                return true;
+            }
+        }
+        return false;
     }
 
     private void checkProtocolVersion() throws IOException {
@@ -229,23 +230,11 @@ public class Socks5Server {
 
         int atype = in.read();
         if (atype == ATYPE_IPV4) {
-            byte[] addressBytes = new byte[4];
-            in.readFully(addressBytes);
-            address = InetAddress.getByAddress(addressBytes);
+            readInetAddress(4);
         } else if (atype == ATYPE_DNS) {
-            int hostNameLength = in.read();
-            byte[] hostName = new byte[hostNameLength];
-            in.readFully(hostName);
-
-            // We use this so we have an IOException thrown instead of an unchecked exception.
-            CharsetDecoder asciiDecoder = Charset.forName("US-ASCII").newDecoder();
-            CharBuffer hostBuffer = asciiDecoder.decode(ByteBuffer.wrap(hostName));
-
-            this.hostName = hostBuffer.toString();
+            readDns();
         } else if (atype == ATYPE_IPV6) {
-            byte[] addressBytes = new byte[16];
-            in.readFully(addressBytes);
-            address = InetAddress.getByAddress(addressBytes);
+            readInetAddress(16);
         } else {
             correct = false;
         }
@@ -253,6 +242,24 @@ public class Socks5Server {
         port = in.read() << 8 | in.read();
 
         return correct;
+    }
+
+    private void readDns() throws IOException {
+        int hostNameLength = in.read();
+        byte[] hostName = new byte[hostNameLength];
+        in.readFully(hostName);
+
+        // We use this so we have an IOException thrown instead of an unchecked exception.
+        CharsetDecoder asciiDecoder = Charset.forName("US-ASCII").newDecoder();
+        CharBuffer hostBuffer = asciiDecoder.decode(ByteBuffer.wrap(hostName));
+
+        this.hostName = hostBuffer.toString();
+    }
+
+    private void readInetAddress(int i) throws IOException {
+        byte[] addressBytes = new byte[i];
+        in.readFully(addressBytes);
+        address = InetAddress.getByAddress(addressBytes);
     }
 
     /**
