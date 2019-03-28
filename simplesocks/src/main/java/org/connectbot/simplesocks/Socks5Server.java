@@ -220,11 +220,11 @@ public class Socks5Server {
     /**
      * Reads the type of request the client has made.
      *
-     * @throws IOException when the underlying stream has a problem
      * @see #getCommand()
      * @see #getAddress()
      * @see #getPort()
      * @return {@code true} if the client request was valid
+     * @throws IOException when the underlying stream has a problem
      */
     public boolean readRequest() throws IOException {
         checkProtocolVersion();
