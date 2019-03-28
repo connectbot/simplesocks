@@ -29,10 +29,10 @@ import java.nio.charset.Charset;
 import java.nio.charset.CharsetDecoder;
 
 /**
- * A simple SOCKS5 server which does no authentication and only accepts {@code CONNECT} requests (i.e., no
- * {@code BIND}).
- * <p>
- * Example usage:
+ * A simple SOCKS5 server which does no authentication and only accepts {@code CONNECT} requests
+ * (i.e., no {@code BIND}).
+ *
+ * <p>Example usage:
  * <pre><code>
  *     Socks5Server server = new Socks5Server(sockIn, sockOut);
  *     if (server.acceptAuthentication() &amp;&amp; server.readRequest()) {
@@ -62,12 +62,13 @@ public class Socks5Server {
     private final DataOutputStream out;
 
     /**
-     * Command that a client can request. Currently only the {@link #CONNECT} command is supported in ConnectBot, so
-     * {@link #BIND} may fail.
+     * Command that a client can request. Currently only the {@link #CONNECT} command is supported
+     * in ConnectBot, so {@link #BIND} may fail.
      */
     public enum Command {
         /**
-         * Represents a request from the client for the server to connect the input and output streams to a remote host.
+         * Represents a request from the client for the server to connect the input and output
+         * streams to a remote host.
          */
         CONNECT(0x01),
         /**
@@ -171,8 +172,8 @@ public class Socks5Server {
     }
 
     /**
-     * Begin the authentication with the client. If the authentication succeeds, this will return {@code true}.
-     * Otherwise, the server must hang up on the client.
+     * Begin the authentication with the client. If the authentication succeeds, this will return
+     * {@code true}. Otherwise, the server must hang up on the client.
      *
      * @throws IOException when the underlying stream has a problem
      * @return {@code true} when authentication succeeds
@@ -261,16 +262,17 @@ public class Socks5Server {
         this.hostName = hostBuffer.toString();
     }
 
-    private void readInetAddress(int i) throws IOException {
-        byte[] addressBytes = new byte[i];
+    private void readInetAddress(int addressBytesLen) throws IOException {
+        byte[] addressBytes = new byte[addressBytesLen];
         in.readFully(addressBytes);
         address = InetAddress.getByAddress(addressBytes);
     }
 
     /**
-     * Send back to the client the given {@code response}. If the {@link ResponseCode#SUCCESS SUCCESS} code is returned,
-     * the server must immediately connect the input and output streams to the requested socket. If any other code is
-     * returned, then the server must hang up on the client.
+     * Send back to the client the given {@code response}. If the {@link ResponseCode#SUCCESS
+     * SUCCESS} code is returned, the server must immediately connect the input and output streams
+     * to the requested socket. If any other code is returned, then the server must hang up on the
+     * client.
      *
      * @param response code to send back to the client
      * @throws IOException when the underlying stream has a problem
