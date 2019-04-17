@@ -10,8 +10,8 @@ before_cache:
 
 matrix:
   include:
-    - jdk: oraclejdk9
-    - jdk: oraclejdk8
+    - jdk: openjdk9
+    - jdk: openjdk8
       env: COVERAGE="true" RELEASE="true"
 
 after_success:
