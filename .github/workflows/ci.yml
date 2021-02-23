@@ -1,0 +1,40 @@
+# This workflow will build a Java project with Gradle
+# For more information see: https://help.github.com/actions/language-and-framework-guides/building-and-testing-java-with-gradle
+
+name: Java CI with Gradle
+
+on:
+  push:
+    branches: '*'
+  pull_request:
+    branches: [ master ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        java: [ 9, 11 ]
+
+    steps:
+    - uses: actions/checkout@v2
+    - name: Set up JDK ${{ matrix.java }}
+      uses: actions/setup-java@v1
+      with:
+        java-version: ${{ matrix.java }}
+    - name: Grant execute permission for gradlew
+      run: chmod +x gradlew
+    - name: Build with Gradle
+      run: ./gradlew build
+    - name: Upload to Sonatype
+      if: github.event_name == 'push' && github.ref == 'refs/heads/master' && matrix.java == '11'
+      run: |
+        echo "${{ secrets.MAVEN_GPG_PRIVATE_KEY }}" > ~/.gradle/secring.gpg.b64
+        base64 -d ~/.gradle/secring.gpg.b64 > ~/.gradle/secring.gpg
+        ./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository -PsonatypeUsername=${SONATYPE_USERNAME} -PsonatypePassword=${SONATYPE_PASSWORD} -Psigning.keyId=${GPG_KEYID} -Psigning.secretKeyRingFile=$(echo ~/.gradle/secring.gpg) -Psigning.password=${GPG_PASSWORD}
+      env:
+        GPG_KEYID: ${{ secrets.MAVEN_GPG_KEYID }}
+        GPG_PASSWORD: ${{ secrets.MAVEN_GPG_PASSPHRASE }}
+        SONATYPE_USERNAME: ${{ secrets.SONATYPE_USERNAME }}
+        SONATYPE_PASSWORD: ${{ secrets.SONATYPE_PASSWORD }}
+
