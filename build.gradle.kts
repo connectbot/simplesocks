@@ -29,6 +29,9 @@ val gitHubUrl = "https://github.com/connectbot/simplesocks"
 java {
     withJavadocJar()
     withSourcesJar()
+    toolchain {
+        languageVersion.set(JavaLanguageVersion.of(8))
+    }
 }
  
 dependencies {
