@@ -19,7 +19,7 @@ plugins {
     `maven-publish`
     signing
     id("net.researchgate.release") version "2.8.1"
-    id("io.github.gradle-nexus.publish-plugin") version "1.0.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
 group = "org.connectbot"
