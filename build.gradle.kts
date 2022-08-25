@@ -18,7 +18,7 @@ plugins {
     `java-library`
     `maven-publish`
     signing
-    id("net.researchgate.release") version "2.8.1"
+    id("net.researchgate.release") version "3.0.1"
     id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
 }
 
